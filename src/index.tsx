@@ -1,6 +1,9 @@
 import * as esbuild from 'esbuild-wasm';
 import { useEffect, useState, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
+import { unpkgPathPlugin } from './plugins/unpkg-path-plugin';
+
+import './index.css';
 
 const App = () => {
   const ref = useRef<any>();
@@ -24,26 +27,40 @@ const App = () => {
       return;
     }
 
-    const result = await ref.current.transform(input, {
-      loader: 'jsx',
-      target: 'es2015',
+    const result = await ref.current.build({
+      entryPoints: ['index.js'],
+      bundle: true,
+      write: false,
+      plugins: [unpkgPathPlugin()],
+      define: {
+        'process.env.NODE_ENV': '"development"',
+        global: 'window',
+      },
     });
 
-    setCode(result.code);
+    console.log('result => ', result);
+
+    setCode(result.outputFiles[0].text);
   };
 
   return (
-    <div>
+    <div className="main">
       <textarea
+        className="item item-outline"
         value={input}
         onChange={(e) => setInput(e.target.value)}
       ></textarea>
       <div>
-        <button onClick={onClick}>Submit</button>
+        <button className="btn" onClick={onClick}>
+          Submit
+        </button>
       </div>
-      <pre>{code}</pre>
+      <pre className="item item-outline">{code}</pre>
     </div>
   );
 };
 
-ReactDOM.render(<App />, document.querySelector('#root'));
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(<App />);

@@ -1,6 +1,6 @@
 import * as esbuild from 'esbuild-wasm';
 import { useEffect, useState, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import { unpkgPathPlugin } from './plugins/unpkg-path-plugin';
 
 import './index.css';
@@ -32,6 +32,10 @@ const App = () => {
       bundle: true,
       write: false,
       plugins: [unpkgPathPlugin()],
+      define: {
+        'process.env.NODE_ENV': '"development"',
+        global: 'window',
+      },
     });
 
     console.log('result => ', result);
@@ -56,4 +60,7 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />, document.querySelector('#root'));
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(<App />);
